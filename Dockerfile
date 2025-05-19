@@ -7,11 +7,11 @@ WORKDIR /app
 # Copy the requirements file to the working directory
 COPY requirements.txt .
 
-# Create a virtual environment and activate it
+# Create a virtual environment (without --copies to avoid the issue)
 RUN python3 -m venv /opt/venv
 
-# Install the dependencies inside the virtual environment
-RUN . /opt/venv/bin/activate && pip install --no-cache-dir -r requirements.txt
+# Activate the venv and install dependencies
+RUN /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
