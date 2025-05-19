@@ -1,22 +1,2 @@
-FROM python:3.11-slim
-
-WORKDIR /app
-
-# Copy requirements first
-COPY requirements.txt .
-
-# Install dependencies with much better error reporting
-RUN pip install --upgrade pip && \
-    pip install --verbose --no-cache-dir -r requirements.txt 2>&1 | tee pip_install_log.txt || \
-    (echo "Failed to install requirements. See detailed error log below:" && \
-    cat pip_install_log.txt && \
-    exit 1)
-
-# Copy the application code
-COPY . .
-
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-
-# Command to run the application
-CMD ["python", "main.py"]
+python-telegram-bot==22.1
+python-dotenv==1.1.0
