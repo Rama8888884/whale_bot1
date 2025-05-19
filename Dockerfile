@@ -12,19 +12,15 @@ WORKDIR /app
 # Copy only the requirements file first to leverage Docker's caching
 COPY requirements.txt /app/
 
-# Update and install system dependencies with better error handling
+# Update and install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc build-essential && \
-    pip install --no-cache-dir --upgrade pip setuptools wheel && \
-    # Run pip with verbose output and capture errors
-    pip install --verbose --no-cache-dir -r requirements.txt 2>&1 | tee pip_error.log || \
-    (echo "Dependencies installation failed. See detailed error log:" && \
-     cat pip_error.log && \
-     exit 1) && \
-    apt-get remove -y gcc build-essential && \
-    apt-get autoremove -y && \
-    apt-get clean && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y --no-install-recommends gcc build-essential
+
+# Upgrade pip and install basic tools
+RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+
+# Try installing minimal Telegram requirements first
+RUN pip install --no-cache-dir python-telegram-bot==22.1 python-dotenv==1.1.0
 
 # Copy the entire project into the working directory
 COPY . /app
