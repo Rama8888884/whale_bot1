@@ -1,30 +1,25 @@
-# Use a stable Python version
+# Base image using Python 3.9
 FROM python:3.11-slim
-
-# Set working directory
+# Set environment variables
+ENV PYTHONUNBUFFERED=1
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
+# Create a directory for the application
 WORKDIR /app
-
-# Install system dependencies
+# Copy only the requirements file first to leverage Docker's caching
+COPY requirements.txt /app/
+# Update and install system dependencies
 RUN apt-get update && \
     apt-get install -y --no-install-recommends gcc build-essential && \
+    pip install --no-cache-dir --upgrade pip setuptools wheel && \
+    pip install --no-cache-dir -r requirements.txt && \
+    apt-get remove -y gcc build-essential && \
+    apt-get autoremove -y && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
-
-# Copy requirements file
-COPY requirements.txt .
-
-# Try installing with a different approach - one by one for essential packages
-RUN pip install --upgrade pip setuptools wheel && \
-    echo "Installing essential packages separately..." && \
-    pip install python-telegram-bot==22.1 && \
-    pip install python-dotenv==1.1.0 && \
-    echo "Essential packages installed successfully"
-
-# Copy your application code
-COPY . .
-
-# Expose port if needed
+# Copy the entire project into the working directory
+COPY . /app
+# Expose the port your application will run on
 EXPOSE 8000
-
-# Command to run the application
+# Run the application
 CMD ["python", "main.py"]
