@@ -7,17 +7,11 @@ WORKDIR /app
 # Copy the requirements file to the working directory
 COPY requirements.txt .
 
-# Create a virtual environment (without --copies to avoid the issue)
-RUN python3 -m venv /opt/venv
-
-# Activate the venv and install dependencies
-RUN /opt/venv/bin/pip install --no-cache-dir -r requirements.txt
+# Install the dependencies globally (no venv)
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy the rest of the application code
 COPY . .
-
-# Set environment variables to use the venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 # Run the bot
 CMD ["python", "main.py"]
