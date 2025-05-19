@@ -1,32 +1,30 @@
-# Base image using Python 3.11
+# Use a stable Python version
 FROM python:3.11-slim
 
-# Set environment variables
-ENV PYTHONUNBUFFERED=1
-ENV LANG=C.UTF-8
-ENV LC_ALL=C.UTF-8
-
-# Create a directory for the application
+# Set working directory
 WORKDIR /app
 
-# Copy only the requirements file first to leverage Docker's caching
-COPY requirements.txt /app/
-
-# Update and install system dependencies
+# Install system dependencies
 RUN apt-get update && \
-    apt-get install -y --no-install-recommends gcc build-essential
+    apt-get install -y --no-install-recommends gcc build-essential && \
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
 
-# Upgrade pip and install basic tools
-RUN pip install --no-cache-dir --upgrade pip setuptools wheel
+# Copy requirements file
+COPY requirements.txt .
 
-# Try installing minimal Telegram requirements first
-RUN pip install --no-cache-dir python-telegram-bot==22.1 python-dotenv==1.1.0
+# Try installing with a different approach - one by one for essential packages
+RUN pip install --upgrade pip setuptools wheel && \
+    echo "Installing essential packages separately..." && \
+    pip install python-telegram-bot==22.1 && \
+    pip install python-dotenv==1.1.0 && \
+    echo "Essential packages installed successfully"
 
-# Copy the entire project into the working directory
-COPY . /app
+# Copy your application code
+COPY . .
 
-# Expose the port your application will run on
+# Expose port if needed
 EXPOSE 8000
 
-# Run the application
+# Command to run the application
 CMD ["python", "main.py"]
