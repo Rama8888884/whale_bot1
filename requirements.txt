@@ -1,22 +1,22 @@
-# Use a stable Python version
 FROM python:3.11-slim
 
-# Set working directory
 WORKDIR /app
 
-# Copy requirements first for better caching
+# Copy requirements first
 COPY requirements.txt .
 
-# Install dependencies with verbose output and error logging
+# Install dependencies with much better error reporting
 RUN pip install --upgrade pip && \
-    pip install --no-cache-dir -r requirements.txt || (pip install --verbose --no-cache-dir -r requirements.txt && exit 1)
+    pip install --verbose --no-cache-dir -r requirements.txt 2>&1 | tee pip_install_log.txt || \
+    (echo "Failed to install requirements. See detailed error log below:" && \
+    cat pip_install_log.txt && \
+    exit 1)
 
 # Copy the application code
 COPY . .
 
 # Set environment variables
 ENV PYTHONUNBUFFERED=1
-ENV PYTHONDONTWRITEBYTECODE=1
 
 # Command to run the application
 CMD ["python", "main.py"]
